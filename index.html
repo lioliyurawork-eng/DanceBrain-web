@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>DanceBrain - Критерии оценки</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .search-container {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            border: none;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .search-box input:focus {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            opacity: 0.7;
+        }
+        
+        .content {
+            padding: 16px;
+        }
+        
+        .category {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .category-header {
+            padding: 18px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: all 0.2s;
+        }
+        
+        .category-header:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .category-arrow {
+            transition: transform 0.3s;
+            font-size: 20px;
+        }
+        
+        .category-arrow.open {
+            transform: rotate(180deg);
+        }
+        
+        .category-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .category-content.open {
+            max-height: 2000px;
+        }
+        
+        .criterion {
+            padding: 14px 18px;
+            margin: 0 8px 8px 8px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .criterion:active {
+            transform: scale(0.98);
+            background: rgba(255, 255, 255, 0.25);
+        }
+        
+        .criterion-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 15px;
+        }
+        
+        .criterion-code {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .detail-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 200;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-out;
+            overflow-y: auto;
+        }
+        
+        .detail-view.open {
+            transform: translateX(0);
+        }
+        
+        .detail-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        
+        .back-btn:active {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .detail-title-container {
+            flex: 1;
+        }
+        
+        .detail-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+        
+        .detail-code {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .detail-content {
+            padding: 16px;
+        }
+        
+        .action-buttons {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        
+        .action-btn {
+            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+            color: #fff;
+        }
+        
+        .action-btn:active {
+            transform: scale(0.97);
+        }
+        
+        .action-btn-note {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .action-btn-video {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
+        }
+        
+        .action-btn-link {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+        }
+        
+        .note-form {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .note-form.open {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .form-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .close-form-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #fff;
+        }
+        
+        .note-form textarea,
+        .note-form input {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 15px;
+            margin-bottom: 12px;
+            outline: none;
+            font-family: inherit;
+        }
+        
+        .note-form textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .note-form textarea::placeholder,
+        .note-form input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .save-btn {
+            width: 100%;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.25);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .save-btn:active {
+            background: rgba(255, 255, 255, 0.35);
+            transform: scale(0.98);
+        }
+        
+        .notes-section {
+            margin-top: 24px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        
+        .note-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 13px;
+            opacity: 0.8;
+        }
+        
+        .note-type {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .delete-btn {
+            background: rgba(255, 87, 87, 0.3);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .delete-btn:active {
+            background: rgba(255, 87, 87, 0.5);
+        }
+        
+        .note-content {
+            margin-bottom: 10px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        
+        .note-link {
+            color: #fff;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .note-link:active {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            opacity: 0.7;
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 16px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 DanceBrain</h1>
+            <p>WDSF Standard Dance - Judging System 2.1</p>
+        </div>
+        
+        <div class="search-container">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Поиск критериев...">
+            </div>
+        </div>
+        
+        <div class="content" id="categoriesList"></div>
+    </div>
+
+    <div id="detailView" class="detail-view">
+        <div class="detail-header">
+            <button class="back-btn" onclick="closeDetail()">←</button>
+            <div class="detail-title-container" id="detailTitleContainer"></div>
+        </div>
+        <div class="detail-content" id="detailContent"></div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+        
+        const criteria = {
+            "Technical Quality": {
+                icon: "⚙️",
+                items: {
+                    "tq1": { name: "Posture", code: "TQ/SC 1" },
+                    "tq2": { name: "Dance Holds", code: "TQ/SC 2" },
+                    "tq3": { name: "Centre", code: "TQ/SC 3" },
+                    "tq4": { name: "Balance", code: "TQ/SC 4" },
+                    "tq5": { name: "Foot Skills", code: "TQ/SC 5" },
+                    "tq6": { name: "Body Actions", code: "TQ/SC 6" },
+                    "tq7": { name: "Drive Action", code: "TQ/SC 7" },
+                    "tq8": { name: "Preparation to Move", code: "TQ/SC 8" },
+                    "tq9": { name: "Rise and Fall", code: "TQ/SC 9" },
+                    "tq10": { name: "Swing", code: "TQ/SC 10" },
+                    "tq11": { name: "Pivots/Spins", code: "TQ/SC 11" },
+                    "tq12": { name: "Skilled Figures", code: "TQ/SC 12" }
+                }
+            },
+            "Movement To Music": {
+                icon: "🎵",
+                items: {
+                    "mm1": { name: "Timing/Shuffle Timing", code: "MM/SC 1" },
+                    "mm2": { name: "Rhythm", code: "MM/SC 2" },
+                    "mm3": { name: "Musical Structure", code: "MM/SC 3" }
+                }
+            },
+            "Partnering Skills": {
+                icon: "🤝",
+                items: {
+                    "ps1": { name: "Physical Communication", code: "PS/SC 1" },
+                    "ps2": { name: "Overbalance/Counterbalance", code: "PS/SC 2" },
+                    "ps3": { name: "Time and Space", code: "PS/SC 3" },
+                    "ps4": { name: "Consistency", code: "PS/SC 4" }
+                }
+            },
+            "Choreography and Presentation": {
+                icon: "🎭",
+                items: {
+                    "cp1": { name: "Structure and Composition", code: "CP/SC 1" },
+                    "cp2": { name: "Non Verbal Communication", code: "CP/SC 2" },
+                    "cp3": { name: "Positioning/Floor Craft", code: "CP/SC 3" },
+                    "cp4": { name: "Characterization", code: "CP/SC 4" },
+                    "cp5": { name: "Energy Application", code: "CP/SC 5" },
+                    "cp6": { name: "Atmosphere", code: "CP/SC 6" }
+                }
+            }
+        };
+        
+        let notes = {};
+        let currentCriterion = null;
+        
+        function loadNotes() {
+            tg.CloudStorage.getItem('dance_notes', (err, value) => {
+                if (!err && value) {
+                    try {
+                        notes = JSON.parse(value);
+                    } catch (e) {
+                        console.error('Error parsing notes:', e);
+                    }
+                }
+            });
+        }
+        
+        function saveNotes() {
+            tg.CloudStorage.setItem('dance_notes', JSON.stringify(notes));
+        }
+        
+        function renderCategories() {
+            const container = document.getElementById('categoriesList');
+            container.innerHTML = '';
+            
+            Object.entries(criteria).forEach(([category, data]) => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'category';
+                
+                const headerId = 'header-' + category.replace(/\s/g, '-');
+                const contentId = 'content-' + category.replace(/\s/g, '-');
+                const arrowId = 'arrow-' + category.replace(/\s/g, '-');
+                
+                categoryDiv.innerHTML = `
+                    <div class="category-header" id="${headerId}">
+                        <span>${data.icon} ${category}</span>
+                        <span class="category-arrow" id="${arrowId}">▼</span>
+                    </div>
+                    <div class="category-content" id="${contentId}">
+                        ${Object.entries(data.items).map(([id, item]) => `
+                            <div class="criterion" data-id="${id}">
+                                <div class="criterion-name">${item.name}</div>
+                                <div class="criterion-code">${item.code}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                container.appendChild(categoryDiv);
+                
+                document.getElementById(headerId).addEventListener('click', () => {
+                    toggleCategory(contentId, arrowId);
+                });
+            });
+            
+            document.querySelectorAll('.criterion').forEach(el => {
+                el.addEventListener('click', () => {
+                    showDetail(el.dataset.id);
+                });
+            });
+        }
+        
+        function toggleCategory(contentId, arrowId) {
+            const content = document.getElementById(contentId);
+            const arrow = document.getElementById(arrowId);
+            content.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+        
+        function findCriterion(id) {
+            for (let cat of Object.values(criteria)) {
+                if (cat.items[id]) return cat.items[id];
+            }
+        }
+        
+        function showDetail(criterionId) {
+            currentCriterion = criterionId;
+            const criterion = findCriterion(criterionId);
+            const userNotes = notes[criterionId] || [];
+            
+            document.getElementById('detailTitleContainer').innerHTML = `
+                <div class="detail-title">${criterion.name}</div>
+                <div class="detail-code">${criterion.code}</div>
+            `;
+            
+            document.getElementById('detailContent').innerHTML = `
+                <div class="action-buttons">
+                    <button class="action-btn action-btn-note" onclick="showNoteForm('note')">
+                        📝 Добавить заметку
+                    </button>
+                    <button class="action-btn action-btn-video" onclick="showNoteForm('video')">
+                        🎥 Добавить видео
+                    </button>
+                    <button class="action-btn action-btn-link" onclick="showNoteForm('link')">
+                        🔗 Добавить ссылку
+                    </button>
+                </div>
+                
+                <div id="noteForm" class="note-form"></div>
+                
+                <div class="notes-section">
+                    <div class="section-title">Сохраненные материалы</div>
+                    <div id="notesList">
+                        ${userNotes.length === 0 ? 
+                            '<div class="empty-state"><div class="empty-state-icon">📭</div><div>Пока нет заметок</div></div>' :
+                            userNotes.map((note, idx) => `
+                                <div class="note-item">
+                                    <div class="note-header">
+                                        <div class="note-type">
+                                            <span>${note.type === 'note' ? '📝' : note.type === 'video' ? '🎥' : '🔗'}</span>
+                                            <span>${new Date(note.date).toLocaleDateString('ru-RU')}</span>
+                                        </div>
+                                        <button class="delete-btn" onclick="deleteNote(${idx})">Удалить</button>
+                                    </div>
+                                    <div class="note-content">${note.content}</div>
+                                    ${note.link ? `<a href="${note.link}" class="note-link" target="_blank">🔗 Открыть ссылку</a>` : ''}
+                                </div>
+                            `).join('')
+                        }
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('detailView').classList.add('open');
+            tg.BackButton.show();
+            tg.BackButton.onClick(closeDetail);
+        }
+        
+        function showNoteForm(type) {
+            const form = document.getElementById('noteForm');
+            const icons = { note: '📝', video: '🎥', link: '🔗' };
+            const labels = { note: 'заметку', video: 'транскрипцию', link: 'описание' };
+            
+            form.innerHTML = `
+                <div class="form-title">
+                    <span>${icons[type]} Добавить ${labels[type]}</span>
+                    <button class="close-form-btn" onclick="closeForm()">✕</button>
+                </div>
+                <textarea id="noteContent" placeholder="Введите ${labels[type]}..."></textarea>
+                ${type !== 'note' ? '<input id="noteLink" type="text" placeholder="Ссылка (Google Drive, YouTube)">' : ''}
+                <button class="save-btn" onclick="saveNote('${type}')">💾 Сохранить</button>
+            `;
+            form.classList.add('open');
+        }
+        
+        function closeForm() {
+            document.getElementById('noteForm').classList.remove('open');
+        }
+        
+        function saveNote(type) {
+            const content = document.getElementById('noteContent').value;
+            const link = document.getElementById('noteLink')?.value || '';
+            
+            if (!content.trim()) {
+                tg.showAlert('Введите текст!');
+                return;
+            }
+            
+            if (!notes[currentCriterion]) {
+                notes[currentCriterion] = [];
+            }
+            
+            notes[currentCriterion].push({
+                type,
+                content,
+                link,
+                date: new Date().toISOString()
+            });
+            
+            saveNotes();
+            tg.showPopup({
+                message: '✅ Сохранено!',
+                buttons: [{type: 'ok'}]
+            });
+            
+            showDetail(currentCriterion);
+        }
+        
+        function deleteNote(idx) {
+            tg.showConfirm('Удалить эту заметку?', (confirmed) => {
+                if (confirmed) {
+                    notes[currentCriterion].splice(idx, 1);
+                    saveNotes();
+                    showDetail(currentCriterion);
+                }
+            });
+        }
+        
+        function closeDetail() {
+            document.getElementById('detailView').classList.remove('open');
+            tg.BackButton.hide();
+        }
+        
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const search = e.target.value.toLowerCase();
+            document.querySelectorAll('.criterion').forEach(el => {
+                const text = el.textContent.toLowerCase();
+                el.style.display = text.includes(search) ? 'block' : 'none';
+            });
+        });
+        
+        loadNotes();
+        renderCategories();
+    </script>
+</body>
+</html>
